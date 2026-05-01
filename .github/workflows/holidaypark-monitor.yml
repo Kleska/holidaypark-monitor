@@ -2,12 +2,11 @@ name: holidaypark-monitor
 
 on:
   schedule:
-    # Co 10 minut. GitHub czasem opóźnia o kilka minut, to normalne.
     - cron: "*/10 * * * *"
-  workflow_dispatch: # pozwala odpalić ręcznie z UI GitHuba
+  workflow_dispatch:
 
 permissions:
-  contents: write # potrzebne żeby commitować state.json
+  contents: write
 
 jobs:
   check:
@@ -28,6 +27,9 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python check.py
 
       - name: Commit state
