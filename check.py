@@ -13,44 +13,46 @@ import requests
 
 
 # ============================================================
-# TUTAJ DODAJESZ SWOJE ZAPYTANIA
+# ZAPYTANIA DO MONITOROWANIA
 # ============================================================
-# Kazde zapytanie to jeden blok { ... }. Mozesz miec ich dowolnie wiele.
-# Zwroc uwage na przecinki miedzy blokami!
-#
-# resort: numer osrodka (z URL-a w DevTools)
-# date_from / date_to: format RRRR-MM-DD
-# accommodation_type: typ domku (1, 2, 3, 4, 5)
 
 WATCHLIST = [
     {
-        "name": "Ustronie 04-10.05.2026 typ 1",
+        "name": "Resort 8 - typ 1 (04-10.05.2026)",
         "params": {
-            "resort": 2,
+            "resort": 8,
             "date_from": "2026-05-04",
             "date_to": "2026-05-10",
             "accommodation_type": 1,
         },
     },
     {
-        "name": "Ustronie 04-10.05.2026 typ 4",
+        "name": "Resort 8 - typ 4 (04-10.05.2026)",
         "params": {
-            "resort": 2,
+            "resort": 8,
             "date_from": "2026-05-04",
             "date_to": "2026-05-10",
             "accommodation_type": 4,
         },
     },
-    # Skopiuj blok wyzej, zmien wartosci, dodaj przecinek po } i jedziesz dalej:
-    # {
-    #     "name": "Inny osrodek czerwiec",
-    #     "params": {
-    #         "resort": 3,
-    #         "date_from": "2026-06-01",
-    #         "date_to": "2026-06-07",
-    #         "accommodation_type": 1,
-    #     },
-    # },
+    {
+        "name": "Resort 1 - typ 1 (04-10.05.2026)",
+        "params": {
+            "resort": 1,
+            "date_from": "2026-05-04",
+            "date_to": "2026-05-10",
+            "accommodation_type": 1,
+        },
+    },
+    {
+        "name": "Resort 1 - typ 4 (04-10.05.2026)",
+        "params": {
+            "resort": 1,
+            "date_from": "2026-05-04",
+            "date_to": "2026-05-10",
+            "accommodation_type": 4,
+        },
+    },
 ]
 
 # ============================================================
