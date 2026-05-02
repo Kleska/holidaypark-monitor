@@ -1,8 +1,9 @@
 """
-Monitor dostepnosci domkow Holiday Park & Resort.
+Monitor dostepnosci domkow Holiday Park & Resort - wersja dla GitHub Actions.
 Robi jedno sprawdzenie i konczy. Cron w GitHub Actions wywoluje cyklicznie.
 
-Powiadomienia: Telegram + email (oba opcjonalne, dziala kazde z osobna).
+UWAGA: API zwraca wszystkie dostepne miejsca w resorcie niezaleznie od parametru
+accommodation_type w URL, dlatego filtrujemy lokalnie po polu accommodation_type_id.
 """
 
 import json
@@ -20,11 +21,16 @@ import requests
 
 # ============================================================
 # ZAPYTANIA DO MONITOROWANIA
+# accommodation_type:
+#   1 = domek (D01, D02, ...)
+#   2 = apartament wyzsze pietro (A1B, A1C ...)
+#   4 = domek z ogrodem
+#   5 = apartament z ogrodem (A1A, A2A, ... - parter)
 # ============================================================
 
 WATCHLIST = [
     {
-        "name": "Mielno - typ 1 (04-10.05.2026)",
+        "name": "Mielno - typ 1 domek (04-10.05.2026)",
         "params": {
             "resort": 8,
             "date_from": "2026-05-04",
@@ -33,7 +39,7 @@ WATCHLIST = [
         },
     },
     {
-        "name": "Mielno - typ 4 (04-10.05.2026)",
+        "name": "Mielno - typ 4 domek z ogrodem (04-10.05.2026)",
         "params": {
             "resort": 8,
             "date_from": "2026-05-04",
@@ -42,7 +48,16 @@ WATCHLIST = [
         },
     },
     {
-        "name": "Pobierowo - typ 1 (04-10.05.2026)",
+        "name": "Mielno - typ 5 apartament z ogrodem (04-10.05.2026)",
+        "params": {
+            "resort": 8,
+            "date_from": "2026-05-04",
+            "date_to": "2026-05-10",
+            "accommodation_type": 5,
+        },
+    },
+    {
+        "name": "Pobierowo - typ 1 domek (04-10.05.2026)",
         "params": {
             "resort": 1,
             "date_from": "2026-05-04",
@@ -51,12 +66,21 @@ WATCHLIST = [
         },
     },
     {
-        "name": "Pobierowo - typ 4 (04-10.05.2026)",
+        "name": "Pobierowo - typ 4 domek z ogrodem (04-10.05.2026)",
         "params": {
             "resort": 1,
             "date_from": "2026-05-04",
             "date_to": "2026-05-10",
             "accommodation_type": 4,
+        },
+    },
+    {
+        "name": "Pobierowo - typ 5 apartament z ogrodem (04-10.05.2026)",
+        "params": {
+            "resort": 1,
+            "date_from": "2026-05-04",
+            "date_to": "2026-05-10",
+            "accommodation_type": 5,
         },
     },
 ]
@@ -67,11 +91,9 @@ API_URL = "https://rezerwuj.holidaypark.pl/api/reservation/available-apartments/
 STATE_FILE = Path("state.json")
 BOOKING_URL = "https://rezerwuj.holidaypark.pl/"
 
-# Telegram (opcjonalny)
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
-# Email (opcjonalny). Domyslnie SMTP Gmaila.
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "")
 EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
 EMAIL_TO = os.environ.get("EMAIL_TO", "")
@@ -159,11 +181,9 @@ def email_send(subject, plain_text, html_text):
 
 
 def notify(query_name, items):
-    """items: lista par (apartment_id, display_name)."""
     bullets_plain = "\n".join(f"- {dn} ({aid})" for aid, dn in items)
     bullets_html = "".join(f"<li>{dn} ({aid})</li>" for aid, dn in items)
 
-    # Telegram (Markdown)
     md = (
         f"🔔 *Wolny domek!*\n\n"
         f"_{query_name}_\n\n"
@@ -172,7 +192,6 @@ def notify(query_name, items):
     )
     telegram_send(md)
 
-    # Email
     subject = f"🔔 Wolny domek - {query_name}"
     plain = (
         f"Pojawil sie wolny domek!\n\n"
@@ -221,8 +240,10 @@ def check_one(query, state):
 
 def main():
     log(f"Start - {len(WATCHLIST)} zapytan do sprawdzenia")
-    log(f"Telegram: {'TAK' if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID else 'NIE'}, "
-        f"Email: {'TAK' if EMAIL_FROM and EMAIL_PASSWORD and EMAIL_TO else 'NIE'}")
+    log(
+        f"Telegram: {'TAK' if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID else 'NIE'}, "
+        f"Email: {'TAK' if EMAIL_FROM and EMAIL_PASSWORD and EMAIL_TO else 'NIE'}"
+    )
     state = load_state()
     for query in WATCHLIST:
         check_one(query, state)
